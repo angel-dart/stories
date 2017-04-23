@@ -1,7 +1,12 @@
 library story.routes;
 
+import 'dart:io';
 import 'package:angel_common/angel_common.dart';
+import 'package:angel_file_security/angel_file_security.dart';
 import 'controllers/controllers.dart' as controllers;
+import '../models/models.dart';
+
+const List<String> IMAGE_EXTENSIONS = const ['.jpg', '.png', '.gif', '.tiff'];
 
 configureBefore(Angel app) async {
   app.before.add(cors());
@@ -9,17 +14,26 @@ configureBefore(Angel app) async {
 
 /// Put your app routes here!
 configureRoutes(Angel app) async {
-  app.get('/', (req, ResponseContext res) => res.render('hello'));
+  app.chain([
+    'auth',
+    restrictFileUploads(maxFiles: 1, allowedExtensions: IMAGE_EXTENSIONS)
+  ]).post('/api/upload', handleUpload);
 }
+
+handleUpload(RequestContext req, User user, Directory uploadsDir) {}
 
 configureAfter(Angel app) async {
   // Uncomment this to proxy over pub serve while in development:
-  // await app.configure(new PubServeLayer());
-  
+  await app.configure(new PubServeLayer());
+
   // Static server at /web or /build/web, depending on if in production
   //
   // In production, `Cache-Control` headers will also be enabled.
-  await app.configure(new CachingVirtualDirectory());
+  var vDir = new CachingVirtualDirectory();
+  await app.configure(vDir);
+  var uploadsDir = new Directory.fromUri(vDir.source.uri.resolve('uploads'));
+  if (!await uploadsDir.exists()) await uploadsDir.create(recursive: true);
+  app.inject('uploadsDir', uploadsDir);
 
   // Set our application up to handle different errors.
   var errors = new ErrorHandler(handlers: {

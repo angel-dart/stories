@@ -1,7 +1,15 @@
 library story.routes.controllers.auth;
 
+import 'package:angel_auth_google/angel_auth_google.dart';
 import 'package:angel_common/angel_common.dart';
-import '../../services/user.dart';
+import 'package:googleapis/plus/v1.dart';
+import '../../models/user.dart';
+
+const GOOGLE_AUTH_SCOPES = const [
+  PlusApi.PlusMeScope,
+  PlusApi.UserinfoEmailScope,
+  PlusApi.UserinfoProfileScope
+];
 
 @Expose('/auth')
 class AuthController extends Controller {
@@ -11,22 +19,32 @@ class AuthController extends Controller {
   ///
   /// Our User service is already wired to remove sensitive data from serialized JSON.
   deserializer(String id) async =>
-      app.service('api/users').read(id, {'provider': Providers.REST});
+      app.service('api/users').read(id).then(User.parse);
 
   serializer(User user) async => user.id;
 
   /// Attempt to log a user in
-  LocalAuthVerifier localVerifier(Service userService) {
-    return (String username, String password) async {
-      List<User> users = await userService.index({
-        'query': {'username': username}
-      });
+  GoogleAuthCallback googleAuthVerifier(Service userService) {
+    return (_, Person profile) async {
+      List<User> users = (await userService.index({
+        'query': {'googleId': profile.id}
+      }))
+          .map(User.parse)
+          .toList();
 
       if (users.isNotEmpty) {
-        return users.firstWhere((user) {
-          var hash = hashPassword(password, user.salt, app.jwt_secret);
-          return user.username == username && user.password == hash;
-        }, orElse: () => null);
+        var user = users.first
+          ..avatar = profile.image.url
+          ..name = profile.displayName;
+        await userService.modify(user.id, user.toJson());
+        return user;
+      } else {
+        var userData = await userService.create({
+          'googleId': profile.id,
+          'avatar': profile.image.url,
+          'name': profile.displayName
+        });
+        return User.parse(userData);
       }
     };
   }
@@ -37,13 +55,19 @@ class AuthController extends Controller {
     auth = new AngelAuth(jwtKey: app.jwt_secret)
       ..serializer = serializer
       ..deserializer = deserializer
-      ..strategies
-          .add(new LocalAuthStrategy(localVerifier(app.service('api/users'))));
+      ..strategies.add(new GoogleStrategy(
+          callback: googleAuthVerifier(app.service('api/users')),
+          config: app.google,
+          scopes: GOOGLE_AUTH_SCOPES));
 
     await super.call(app);
     await app.configure(auth);
   }
 
-  @Expose('/local', method: 'POST')
-  login() => auth.authenticate('local');
+  @Expose('/google')
+  googleAuth() => auth.authenticate('google');
+
+  @Expose('/google/callback')
+  googleAuthCallback() => auth.authenticate(
+      'google', new AngelAuthOptions(callback: confirmPopupAuthentication()));
 }

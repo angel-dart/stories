@@ -1,0 +1,3 @@
+[submodule "web/zuck"]
+	path = web/zuck
+	url = https://github.com/ramon82/zuck.js

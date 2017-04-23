@@ -1,27 +1,19 @@
-library story.models.user;
-
+library story.models.story;
 import 'package:angel_framework/common.dart';
 
-class User extends Model {
+class Story extends Model {
   @override
   String id;
-  String googleId, avatar, name;
+  String userId, path;
   @override
   DateTime createdAt, updatedAt;
 
-  User(
-      {this.id,
-        this.googleId,
-        this.avatar,
-        this.name,
-        this.createdAt,
-        this.updatedAt});
+  Story({this.id, this.userId, this.path, this.createdAt, this.updatedAt});
 
-  static User parse(Map map) => new User(
+  static Story parse(Map map) => new Story(
       id: map['id'],
-      googleId: map['googleId'],
-      avatar: map['avatar'],
-      name: map['name'],
+      userId: map['userId'],
+      path: map['path'],
       createdAt: map.containsKey('createdAt')
           ? DateTime.parse(map['createdAt'])
           : null,
@@ -32,9 +24,8 @@ class User extends Model {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'googleId': googleId,
-      'avatar': avatar,
-      'name': name,
+      'userId': userId,
+      'path': path,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String()
     };
