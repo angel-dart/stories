@@ -8,32 +8,32 @@ class Zuck {
   external factory Zuck(String timeline, ZuckOptions options);
   external void update(StoryInfo story);
   external void remove(StoryInfo story);
-  external void addItem(String storyId, StoryInfo story);
-  external void removeItem(String storyId, StoryInfo story);
+  external void addItem(String storyId, StoryItem item);
+  external void removeItem(String storyId, StoryItem item);
 }
 
 @JS()
 @anonymous
 class ZuckOptions {
   external String get id;
-  external set id (String v);
+  external set id(String v);
   external String get skin;
-  external set skin (String v);
+  external set skin(String v);
   external bool get avatars;
-  external set avatars (bool v);
+  external set avatars(bool v);
   external bool get list;
-  external set list (bool v);
+  external set list(bool v);
   external bool get openEffect;
-  external set openEffect (bool v);
+  external set openEffect(bool v);
   external bool get cubeEffect;
-  external set cubeEffect (bool v);
+  external set cubeEffect(bool v);
   external bool get autoFullScreen;
-  external set autoFullScreen (bool v);
+  external set autoFullScreen(bool v);
   external bool get backButton;
-  external set backButton (bool v);
+  external set backButton(bool v);
   external bool get backNative;
-  external set backNative (bool v);
-  
+  external set backNative(bool v);
+
   external factory ZuckOptions(
       {String id,
       String skin,
@@ -70,6 +70,6 @@ class StoryItem {
       String preview,
       String link,
       String linkText,
-      String time,
+      time,
       bool seen});
 }

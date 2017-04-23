@@ -1,8 +1,9 @@
 library story.config;
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:angel_common/angel_common.dart';
-// import 'package:angel_multiserver/angel_multiserver.dart';
+import 'package:angel_websocket/server.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'plugins/plugins.dart' as plugins;
 
@@ -11,11 +12,14 @@ configureServer(Angel app) async {
   await app.configure(loadConfigurationFile());
   var db = new Db(app.mongo_db);
   await db.open();
-  app.container.singleton(db);
+  app
+    ..lazyParseBodies = true
+    ..injectSerializer(JSON.encode)
+    ..container.singleton(db);
 
   await app.configure(mustache(new Directory('views')));
   await plugins.configureServer(app);
-
+  await app.configure(new AngelWebSocket());
 
   // Uncomment this to enable session synchronization across instances.
   // This will add the overhead of querying a database at the beginning

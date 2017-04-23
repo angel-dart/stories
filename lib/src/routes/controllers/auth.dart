@@ -52,7 +52,7 @@ class AuthController extends Controller {
   @override
   call(Angel app) async {
     // Wire up local authentication, connected to our User service
-    auth = new AngelAuth(jwtKey: app.jwt_secret)
+    auth = new AngelAuth(jwtKey: app.jwt_secret, allowCookie: false)
       ..serializer = serializer
       ..deserializer = deserializer
       ..strategies.add(new GoogleStrategy(

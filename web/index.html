@@ -2,10 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <title>Stories</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.css">
+    <link rel="stylesheet" href="zuck/zuck.css">
+    <style>
+        html, body {
+            margin: 0;
+        }
+
+        .stories.carousel .story > a > .info {
+            color: white;
+        }
+    </style>
 </head>
 <body>
-<div id="stories"></div>
+<div id="main-menu" class="ui large inverted borderless teal menu" style="border-radius: 0;">
+    <div class="header item">
+        <i class="book icon"></i>
+        Stories
+    </div>
+</div>
+<br>
+<div class="ui container">
+    <div id="story-container" class="ui fluid message" style="display: none">
+        <div id="stories" style="padding-left: 1em; padding-right: 1em;"></div>
+    </div>
+    <div id="guest-area">
+        <h1 class="ui header">Sign in</h1>
+        You are not logged in. You must sign in with Google to post a story.
+        <br><br>
+        <button class="ui google plus button" id="sign-in" type="button">
+            <i class="google icon"></i>
+            Sign in with Google
+        </button>
+    </div>
+    <div id="upload-area" style="display: none">
+        <h3>Upload a photo to post a story:</h3>
+        <form class="ui form" id="upload-form">
+            <input id="upload-file" name="photo" type="file">
+            <br><br>
+            <input class="ui button" id="upload-btn" type="submit" value="Submit">
+            <div id="upload-progress" class="ui active progress" style="display: none;">
+                <div id="upload-progress-bar" class="bar" style="transition-duration: 300ms;"></div>
+            </div>
+        </form>
+    </div>
+</div>
 <script src="zuck/zuck.min.js"></script>
 <script src="main.dart" type="application/dart"></script>
 <script src="packages/browser/dart.js"></script>

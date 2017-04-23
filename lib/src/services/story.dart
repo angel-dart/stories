@@ -10,15 +10,12 @@ AngelConfigurer configureServer(Db db) {
 
     service
       ..before([
+        HookedServiceEvent.CREATED,
         HookedServiceEvent.MODIFIED,
         HookedServiceEvent.UPDATED,
         HookedServiceEvent.REMOVED
       ], hooks.disable())
-      ..beforeCreated.listen(hooks.chainListeners([
-        auth.restrictToAuthenticated(),
-        auth.associateCurrentUser(),
-        hooks.addCreatedAt()
-      ]))
+      ..beforeCreated.listen(hooks.addCreatedAt())
       ..beforeModify(hooks.addUpdatedAt());
   };
 }

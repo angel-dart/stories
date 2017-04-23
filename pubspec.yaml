@@ -8,6 +8,7 @@ dependencies:
   angel_configuration: "^1.0.0"
   angel_multiserver: "^1.0.0"
   angel_security: ^1.0.0
+  angel_websocket: ^1.0.0
   func: ^1.0.0
   js: ^0.6.1
 dev_dependencies:

@@ -3,6 +3,8 @@ library story.routes;
 import 'dart:io';
 import 'package:angel_common/angel_common.dart';
 import 'package:angel_file_security/angel_file_security.dart';
+import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
 import 'controllers/controllers.dart' as controllers;
 import '../models/models.dart';
 
@@ -14,13 +16,25 @@ configureBefore(Angel app) async {
 
 /// Put your app routes here!
 configureRoutes(Angel app) async {
+  app.container.singleton(new Uuid());
   app.chain([
     'auth',
     restrictFileUploads(maxFiles: 1, allowedExtensions: IMAGE_EXTENSIONS)
   ]).post('/api/upload', handleUpload);
 }
 
-handleUpload(RequestContext req, User user, Directory uploadsDir) {}
+handleUpload(
+    RequestContext req, User user, Directory uploadsDir, Uuid uuid) async {
+  var uploadedFile = req.files.first;
+  var ext = p.extension(uploadedFile.filename);
+  var filename = uuid.v4() + ext;
+  var file = new File.fromUri(uploadsDir.uri.resolve(filename));
+  var sink = file.openWrite()..add(uploadedFile.data);
+  await sink.close();
+  return await req.app
+      .service('api/stories')
+      .create({'userId': user.id, 'path': filename});
+}
 
 configureAfter(Angel app) async {
   // Uncomment this to proxy over pub serve while in development:
